@@ -37,7 +37,11 @@ const Index = () => {
 
   useEffect(() => {
     const fetchLines = async () => {
-      const { data } = await supabase.from("bus_lines").select("*").order("number", { ascending: true });
+      // Tri en base de données (SQL) avec cast en integer pour un ordre parfait
+      const { data } = await supabase
+        .from("bus_lines")
+        .select("*")
+        .order("number::integer", { ascending: true }); // <--- TRIE SQL PARFAIT
       if (data) setLines(data);
     };
     fetchLines();
@@ -51,10 +55,19 @@ const Index = () => {
   const filteredLines = useMemo(() => {
     const start = startPoint.trim().toLowerCase();
     const end = endPoint.trim().toLowerCase();
-    return lines.filter((l) => {
+    
+    const results = lines.filter((l) => {
       const matchType = selectedType ? l.type === selectedType : true;
       const allStopsStr = (l.stops || []).join(" ").toLowerCase();
       return matchType && (start ? allStopsStr.includes(start) : true) && (end ? allStopsStr.includes(end) : true);
+    });
+
+    // Tri final en JavaScript pour un ordre parfait (1, 2, 3, 10, 11...)
+    return results.sort((a, b) => {
+      const numA = parseInt(a.number, 10);
+      const numB = parseInt(b.number, 10);
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return a.number.localeCompare(b.number, undefined, { numeric: true });
     });
   }, [startPoint, endPoint, selectedType, lines]);
 
