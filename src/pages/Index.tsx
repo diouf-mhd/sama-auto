@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Bus, ChevronRight, MapPin, Navigation, Search, ArrowRight, Lock, Clock, Zap, Info, Heart, Copy, X, ExternalLink } from "lucide-react";
+import { Bus, ChevronRight, MapPin, Navigation, Search, ArrowRight, Lock, Clock, Zap, Info, Heart, Copy, X, ExternalLink, Send, CheckCircle2, Loader2, PlusCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { LineDetail } from "@/components/LineDetail";
 import { toast } from "sonner";
@@ -27,6 +27,99 @@ const FadeInScroll = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// --- COMPOSANT MODAL AIDEZ-NOUS (CORRIGÉ) ---
+const SuggestionModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [num, setNum] = useState("");
+  const [reseau, setReseau] = useState("TATA");
+  const [stops, setStops] = useState("");
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const { error } = await (supabase as any).from("suggestions").insert([
+        { ligne_numero: num, reseau: reseau, arrets_proposes: stops }
+      ]);
+
+      if (error) throw error;
+
+      const phone = "221779061173";
+      const message = encodeURIComponent(
+        `*Nouvelle Suggestion Sama Car* 🚍\n\n` +
+        `*Ligne :* ${num}\n` +
+        `*Réseau :* ${reseau}\n` +
+        `*Trajet :* ${stops}\n\n` +
+        `_Envoyé depuis l'application._`
+      );
+
+      setSent(true);
+      setTimeout(() => { 
+        window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+        setSent(false); 
+        onClose(); 
+        setNum(""); 
+        setStops(""); 
+        setLoading(false);
+      }, 1500);
+
+    } catch (err: any) {
+      toast.error("Erreur d'envoi : " + err.message);
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center px-6 bg-black/60 backdrop-blur-sm">
+      <div className="bg-white w-full max-w-sm rounded-[2.5rem] p-8 relative shadow-2xl animate-in zoom-in-95 duration-200">
+        <button onClick={onClose} className="absolute top-6 right-6 text-slate-300"><X /></button>
+        
+        {sent ? (
+          <div className="text-center py-10 space-y-4">
+            <CheckCircle2 size={60} className="text-green-500 mx-auto animate-bounce" />
+            <h2 className="font-black text-xl uppercase italic">Merci !</h2>
+            <p className="text-slate-500 text-xs px-6">WhatsApp va s'ouvrir pour finaliser l'envoi de votre suggestion.</p>
+          </div>
+        ) : (
+          <form onSubmit={submit} className="space-y-5">
+            <h2 className="font-black text-xl uppercase italic text-slate-900">Aidez-nous 🚍</h2>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+              Une ligne manque ou un trajet est faux ? Proposez une mise à jour.
+            </p>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[9px] font-black text-slate-400 uppercase ml-1">N° Ligne</label>
+                <input required placeholder="Ex: 218" className="w-full bg-slate-50 p-3.5 rounded-2xl text-sm outline-none font-bold border-none focus:ring-2 ring-blue-500 transition-all" value={num} onChange={e=>setNum(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Réseau</label>
+                <select className="w-full bg-slate-50 p-3.5 rounded-2xl text-sm font-bold border-none outline-none focus:ring-2 ring-blue-500 appearance-none" value={reseau} onChange={e=>setReseau(e.target.value)}>
+                  <option>TATA</option>
+                  <option>DDD</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="space-y-1">
+               <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Trajet détaillé</label>
+               <textarea required placeholder="Dites nous tout..." rows={3} className="w-full bg-slate-50 p-4 rounded-2xl text-sm outline-none resize-none border-none focus:ring-2 ring-blue-500 transition-all" value={stops} onChange={e=>setStops(e.target.value)} />
+            </div>
+            
+            <button disabled={loading} className="w-full bg-slate-900 text-white p-4 rounded-2xl font-black text-sm uppercase flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50">
+              {loading ? <Loader2 className="animate-spin" size={16} /> : <>Envoyer <Send size={16} /></>}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ✅ FONCTION DE TRI NUMÉRIQUE CROISSANT
 const sortByNumber = (arr: any[]) => {
   return [...arr].sort((a, b) => {
@@ -43,6 +136,7 @@ const Index = () => {
   const [startPoint, setStartPoint] = useState("");
   const [endPoint, setEndPoint] = useState("");
   const [showDonationModal, setShowDonationModal] = useState(false);
+  const [showSuggestModal, setShowSuggestModal] = useState(false);
 
   useEffect(() => {
     const fetchLines = async () => {
@@ -57,7 +151,6 @@ const Index = () => {
     tata: lines.filter(l => l.type === "TATA").length
   }), [lines]);
 
-  // ✅ FILTRAGE + TRI NUMÉRIQUE CROISSANT
   const filteredLines = useMemo(() => {
     const start = startPoint.trim().toLowerCase();
     const end = endPoint.trim().toLowerCase();
@@ -120,7 +213,7 @@ const Index = () => {
         </div>
       </div>
 
-      <main className="flex-1 px-5 mt-6 relative z-20 pb-28">
+      <main className="flex-1 px-5 mt-6 relative z-20 pb-32">
         <div className="flex gap-2 mb-8">
             <button onClick={() => setSelectedType(selectedType === "DDD" ? null : "DDD")} className={`flex-1 py-4 rounded-2xl font-black text-[11px] uppercase transition-all flex items-center justify-center gap-2 ${selectedType === "DDD" ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}><Bus size={14} /> DDD ({stats.ddd})</button>
             <button onClick={() => setSelectedType(selectedType === "TATA" ? null : "TATA")} className={`flex-1 py-4 rounded-2xl font-black text-[11px] uppercase transition-all flex items-center justify-center gap-2 ${selectedType === "TATA" ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}><Zap size={14} /> TATA ({stats.tata})</button>
@@ -155,21 +248,36 @@ const Index = () => {
         </div>
       </main>
 
-      {/* FOOTER */}
-      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-xl border-t border-slate-100 flex items-center justify-between z-50 max-w-md mx-auto">
+      {/* FOOTER RÉORGANISÉ */}
+      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-xl border-t border-slate-100 flex items-center gap-3 z-50 max-w-md mx-auto">
+          {/* CARTE PORTFOLIO */}
+          <a href="https://moussadioufportfolio.kesug.com" target="_blank" className="flex-1 flex items-center gap-3 bg-slate-900 px-3 py-2.5 rounded-2xl shadow-xl active:scale-95 transition-transform">
+            <img src="/moussa.jpg" alt="M" className="w-8 h-8 rounded-full border border-yellow-400 object-cover" />
+            <div className="min-w-0"><p className="text-white font-black text-[9px] leading-none truncate uppercase tracking-tighter">Moussa Diouf</p><p className="text-blue-400 text-[6px] font-bold uppercase mt-1 tracking-widest leading-none">Portfolio</p></div>
+          </a>
+
+          {/* ACTIONS GROUPÉES */}
           <div className="flex items-center gap-2">
-            <a href="https://moussadioufportfolio.kesug.com" target="_blank" className="flex items-center gap-3 bg-slate-900 px-4 py-2.5 rounded-2xl shadow-xl active:scale-95 transition-transform">
-              <img src="/moussa.jpg" alt="M" className="w-8 h-8 rounded-full border border-yellow-400 object-cover" />
-              <div><p className="text-white font-black text-[10px] leading-none">Moussa Diouf</p><p className="text-white/40 text-[7px] font-bold uppercase mt-1 tracking-widest leading-none">M2S Business</p></div>
-            </a>
-            <button onClick={() => setShowDonationModal(true)} className="bg-blue-500 p-3 rounded-2xl text-white shadow-lg shadow-blue-200 active:scale-90 transition-all animate-pulse">
+            {/* BOUTON DON WAVE */}
+            <button onClick={() => setShowDonationModal(true)} className="bg-blue-500 p-3.5 rounded-2xl text-white shadow-lg shadow-blue-100 active:scale-90 transition-all">
               <Heart size={18} fill="currentColor" />
             </button>
+
+            {/* BOUTON AIDEZ-NOUS (AJOUTER LIGNE) */}
+            <button onClick={() => setShowSuggestModal(true)} className="bg-emerald-500 p-3.5 rounded-2xl text-white shadow-lg shadow-emerald-100 active:scale-90 transition-all">
+              <PlusCircle size={18} />
+            </button>
+
+            {/* BOUTON ADMIN */}
+            <Link to="/admin" className="bg-yellow-400 p-3.5 rounded-2xl text-black shadow-lg shadow-yellow-100 active:rotate-12 transition-all">
+              <Lock size={18} />
+            </Link>
           </div>
-          <Link to="/admin" className="bg-yellow-400 p-4 rounded-2xl text-black shadow-lg shadow-yellow-200 active:rotate-12 transition-all"><Lock size={20} /></Link>
       </footer>
 
-      {/* MODAL DON WAVE */}
+      <SuggestionModal isOpen={showSuggestModal} onClose={() => setShowSuggestModal(false)} />
+
+      {/* MODAL DE DON WAVE */}
       {showDonationModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDonationModal(false)}></div>
