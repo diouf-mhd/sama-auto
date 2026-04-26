@@ -27,6 +27,15 @@ const FadeInScroll = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// ✅ FONCTION DE TRI NUMÉRIQUE CROISSANT
+const sortByNumber = (arr: any[]) => {
+  return [...arr].sort((a, b) => {
+    const numA = parseInt(a.number) || 0;
+    const numB = parseInt(b.number) || 0;
+    return numA - numB;
+  });
+};
+
 const Index = () => {
   const [lines, setLines] = useState<any[]>([]);
   const [selectedLine, setSelectedLine] = useState<any | null>(null);
@@ -37,11 +46,7 @@ const Index = () => {
 
   useEffect(() => {
     const fetchLines = async () => {
-      // Tri en base de données (SQL) avec cast en integer pour un ordre parfait
-      const { data } = await supabase
-        .from("bus_lines")
-        .select("*")
-        .order("number::integer", { ascending: true }); // <--- TRIE SQL PARFAIT
+      const { data } = await supabase.from("bus_lines").select("*");
       if (data) setLines(data);
     };
     fetchLines();
@@ -52,30 +57,21 @@ const Index = () => {
     tata: lines.filter(l => l.type === "TATA").length
   }), [lines]);
 
+  // ✅ FILTRAGE + TRI NUMÉRIQUE CROISSANT
   const filteredLines = useMemo(() => {
     const start = startPoint.trim().toLowerCase();
     const end = endPoint.trim().toLowerCase();
-    
-    const results = lines.filter((l) => {
+    const result = lines.filter((l) => {
       const matchType = selectedType ? l.type === selectedType : true;
       const allStopsStr = (l.stops || []).join(" ").toLowerCase();
       return matchType && (start ? allStopsStr.includes(start) : true) && (end ? allStopsStr.includes(end) : true);
     });
-
-    // Tri final en JavaScript pour un ordre parfait (1, 2, 3, 10, 11...)
-    return results.sort((a, b) => {
-      const numA = parseInt(a.number, 10);
-      const numB = parseInt(b.number, 10);
-      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-      return a.number.localeCompare(b.number, undefined, { numeric: true });
-    });
+    return sortByNumber(result);
   }, [startPoint, endPoint, selectedType, lines]);
 
-  // FONCTION : REDIRECTION MARCHAND WAVE
   const handleWaveDonation = () => {
     toast.success("Ouverture de Wave...");
     setTimeout(() => {
-      // Ton lien marchand M2S Business
       window.open("https://pay.wave.com/m/M_sn_Mes0aIYav5Hz/c/sn/", "_blank");
       setShowDonationModal(false);
     }, 800);
@@ -173,7 +169,7 @@ const Index = () => {
           <Link to="/admin" className="bg-yellow-400 p-4 rounded-2xl text-black shadow-lg shadow-yellow-200 active:rotate-12 transition-all"><Lock size={20} /></Link>
       </footer>
 
-      {/* MODAL DE DON WAVE MARCHAND */}
+      {/* MODAL DON WAVE */}
       {showDonationModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDonationModal(false)}></div>
@@ -186,14 +182,9 @@ const Index = () => {
             <p className="text-slate-500 text-[11px] font-medium leading-relaxed mb-8 italic">
               "L'application est gratuite. Ton soutien permet de financer les serveurs et le développement de Sama Car."
             </p>
-            
-            <button 
-              onClick={handleWaveDonation}
-              className="w-full bg-blue-600 p-5 rounded-2xl text-white font-black text-sm uppercase shadow-lg shadow-blue-100 flex items-center justify-center gap-3 active:scale-95 transition-all mb-4"
-            >
+            <button onClick={handleWaveDonation} className="w-full bg-blue-600 p-5 rounded-2xl text-white font-black text-sm uppercase shadow-lg shadow-blue-100 flex items-center justify-center gap-3 active:scale-95 transition-all mb-4">
               Payer via Wave <ExternalLink size={16} />
             </button>
-            
             <p className="text-[9px] text-slate-300 font-bold uppercase tracking-widest">Paiement sécurisé par Wave</p>
           </div>
         </div>
