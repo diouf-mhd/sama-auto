@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================================================
+   Dakar Transport — Design System
+   All colors HSL. Use semantic tokens, never raw colors in components.
+   ================================================================ */
+
+@layer base {
+  :root {
+    /* Surfaces */
+    --background: 210 40% 98%;          /* #f8fafc light gray gradient base */
+    --background-soft: 220 30% 96%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --muted: 220 20% 94%;
+    --muted-foreground: 220 9% 46%;
+
+    --border: 220 16% 90%;
+    --input: 220 16% 92%;
+    --ring: 217 91% 60%;                /* electric blue focus ring */
+
+    /* Brand */
+    --primary: 222 47% 11%;             /* deep ink for text/buttons */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 220 20% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --accent: 217 91% 60%;              /* electric blue */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Network colors */
+    --ddd: 217 91% 55%;                 /* DDD bus blue */
+    --ddd-foreground: 0 0% 100%;
+    --ddd-soft: 217 100% 96%;
+
+    --tata: 45 96% 53%;                 /* TATA bus yellow */
+    --tata-foreground: 30 80% 12%;
+    --tata-soft: 48 100% 95%;
+
+    /* Action gradient (yellow -> orange) */
+    --cta-from: 48 96% 53%;             /* #facc15 */
+    --cta-to: 38 92% 50%;               /* #f59e0b */
+    --gradient-cta: linear-gradient(135deg, hsl(var(--cta-from)), hsl(var(--cta-to)));
+    --gradient-bg: linear-gradient(180deg, hsl(210 40% 99%), hsl(220 30% 96%));
+    --gradient-ddd: linear-gradient(135deg, hsl(217 91% 60%), hsl(224 76% 48%));
+    --gradient-tata: linear-gradient(135deg, hsl(48 96% 53%), hsl(38 92% 50%));
+
+    /* Shadows */
+    --shadow-card: 0 4px 20px -8px hsl(220 40% 20% / 0.08);
+    --shadow-cta: 0 8px 24px -6px hsl(38 92% 50% / 0.45);
+    --shadow-ring: 0 0 0 4px hsl(217 91% 60% / 0.15);
+
+    /* Motion */
+    --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 40% 10%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 40% 10%;
+    --popover-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 217 91% 60%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+    --gradient-bg: linear-gradient(180deg, hsl(222 47% 6%), hsl(222 40% 9%));
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html, body, #root { height: 100%; }
+  body {
+    @apply text-foreground antialiased;
+    background: var(--gradient-bg);
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+}
+
+@layer utilities {
+  .font-display { font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.02em; }
+  .bg-gradient-cta { background: var(--gradient-cta); }
+  .bg-gradient-ddd { background: var(--gradient-ddd); }
+  .bg-gradient-tata { background: var(--gradient-tata); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-cta { box-shadow: var(--shadow-cta); }
+  .ring-focus { box-shadow: var(--shadow-ring); }
+}
+
+/* Theme variants based on selected network */
+[data-theme="ddd"] {
+  --accent: 217 91% 55%;
+  --ring: 217 91% 60%;
+}
+[data-theme="tata"] {
+  --accent: 45 96% 53%;
+  --ring: 38 92% 50%;
+}
+/* ✅ Moving Gradient */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.bg-animated {
+  background: linear-gradient(-45deg, #0ea5e9, #38bdf8, #60a5fa, #93c5fd);
+  background-size: 300% 300%;
+  animation: gradientMove 12s ease infinite;
+}
+
+/* ✅ Floating bubbles */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0px); }
+}
+
+.bubble {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* ✅ Wave effect */
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.wave svg {
+  display: block;
+  width: 100%;
+  height: 80px;
+}
