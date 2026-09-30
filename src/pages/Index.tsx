@@ -129,10 +129,33 @@ const sortByNumber = (arr: any[]) => {
   });
 };
 
+const TER_LINE = {
+  id: "ter-dakar-diamniadio",
+  number: "TER",
+  type: "TER",
+  from_stop: "Dakar",
+  to_stop: "Diamniadio",
+  stops: [
+    "Dakar",
+    "Colobane",
+    "Hann",
+    "Dalifort",
+    "Baux Maraîchers",
+    "Pikine",
+    "Thiaroye",
+    "Yeumbeul",
+    "Keur Mbaye Fall",
+    "PNR",
+    "Rufisque",
+    "Bargny",
+    "Diamniadio",
+  ],
+};
+
 const Index = () => {
   const [lines, setLines] = useState<any[]>([]);
   const [selectedLine, setSelectedLine] = useState<any | null>(null);
-  const [selectedType, setSelectedType] = useState<"DDD" | "TATA" | null>(null);
+  const [selectedType, setSelectedType] = useState<"DDD" | "TATA" | "TER" | null>(null);
   const [startPoint, setStartPoint] = useState("");
   const [endPoint, setEndPoint] = useState("");
   const [showDonationModal, setShowDonationModal] = useState(false);
@@ -141,14 +164,15 @@ const Index = () => {
   useEffect(() => {
     const fetchLines = async () => {
       const { data } = await supabase.from("bus_lines").select("*");
-      if (data) setLines(data);
+      setLines(data ? [...data, TER_LINE] : [TER_LINE]);
     };
     fetchLines();
   }, []);
 
   const stats = useMemo(() => ({
     ddd: lines.filter(l => l.type === "DDD").length,
-    tata: lines.filter(l => l.type === "TATA").length
+    tata: lines.filter(l => l.type === "TATA").length,
+    ter: lines.filter(l => l.type === "TER").length,
   }), [lines]);
 
   const filteredLines = useMemo(() => {
@@ -217,6 +241,7 @@ const Index = () => {
         <div className="flex gap-2 mb-8">
             <button onClick={() => setSelectedType(selectedType === "DDD" ? null : "DDD")} className={`flex-1 py-4 rounded-2xl font-black text-[11px] uppercase transition-all flex items-center justify-center gap-2 ${selectedType === "DDD" ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}><Bus size={14} /> DDD ({stats.ddd})</button>
             <button onClick={() => setSelectedType(selectedType === "TATA" ? null : "TATA")} className={`flex-1 py-4 rounded-2xl font-black text-[11px] uppercase transition-all flex items-center justify-center gap-2 ${selectedType === "TATA" ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}><Zap size={14} /> TATA ({stats.tata})</button>
+            <button onClick={() => setSelectedType(selectedType === "TER" ? null : "TER")} className={`flex-1 py-4 rounded-2xl font-black text-[11px] uppercase transition-all flex items-center justify-center gap-2 ${selectedType === "TER" ? 'bg-red-700 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}><Zap size={14} /> TER ({stats.ter})</button>
         </div>
 
         <div className="space-y-6">
@@ -227,7 +252,7 @@ const Index = () => {
                 <FadeInScroll key={line.id}>
                   <div onClick={() => setSelectedLine(line)} className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center justify-between group active:scale-[0.97] transition-all">
                     <div className="flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg ${line.type === 'DDD' ? 'bg-blue-600' : 'bg-green-600'}`}>
+                      <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg ${line.type === 'DDD' ? 'bg-blue-600' : line.type === 'TER' ? 'bg-red-700' : 'bg-green-600'}`}>
                         <span className="text-[16px] font-black leading-none">{line.number}</span>
                         <span className="text-[7px] font-bold uppercase opacity-70 mt-1">{line.type}</span>
                       </div>
