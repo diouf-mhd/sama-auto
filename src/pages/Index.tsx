@@ -152,6 +152,49 @@ const TER_LINE = {
   ],
 };
 
+const BRT_LINES = [
+  {
+    id: "brt-b1",
+    number: "B1",
+    name: "Omnibus",
+    route: "Préfecture de Guédiawaye ↔ Papa Gueye Fall",
+    stations: "21 stations",
+    schedule: "Tous les jours, 6h–21h",
+    frequency: "6 min lun–sam · 10 puis 7 min le dimanche",
+    color: "bg-emerald-700",
+  },
+  {
+    id: "brt-b2",
+    number: "B2",
+    name: "Semi-express",
+    route: "Guédiawaye ↔ Petersen",
+    stations: "Moins d’arrêts que la B1",
+    schedule: "Tous les jours, 6h–21h",
+    frequency: "Fréquence standard : 6 min",
+    color: "bg-orange-600",
+  },
+  {
+    id: "brt-b3",
+    number: "B3",
+    name: "Semi-express · heures de pointe",
+    route: "Desserte du corridor BRT",
+    stations: "7 stations · 2 pôles d’échanges",
+    schedule: "Du lundi au vendredi, aux heures de pointe",
+    frequency: "Ne dessert pas Grand Médine",
+    color: "bg-emerald-700",
+  },
+  {
+    id: "brt-b4",
+    number: "B4",
+    name: "Express",
+    route: "Terminus : pôle d’échange de Grand Médine",
+    stations: "Desserte express",
+    schedule: "Tous les jours, 6h–21h",
+    frequency: "Fréquence standard : 6 min",
+    color: "bg-orange-600",
+  },
+];
+
 const Index = () => {
   const [lines, setLines] = useState<any[]>([]);
   const [selectedLine, setSelectedLine] = useState<any | null>(null);
@@ -271,6 +314,65 @@ const Index = () => {
             )}
           </div>
         </div>
+
+        <section id="brt" className="mt-10 border-t border-slate-100 pt-8">
+          <div className="mb-5 flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-red-700">SunuBRT · Dakar</p>
+              <h2 className="mt-1 text-xl font-black uppercase italic text-slate-900">Le réseau BRT</h2>
+              <p className="mt-1 text-xs font-medium text-slate-500">Petersen / Papa Gueye Fall ↔ Préfecture de Guédiawaye</p>
+            </div>
+            <span className="shrink-0 rounded-xl bg-red-700 px-3 py-2 text-xs font-black text-white">18,3 km</span>
+          </div>
+
+          <div className="mb-5 grid grid-cols-2 gap-2">
+            <div className="rounded-2xl border border-slate-100 bg-white p-3">
+              <p className="text-lg font-black text-slate-900">Jusqu’à 23</p>
+              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">stations sur le corridor</p>
+            </div>
+            <div className="rounded-2xl border border-slate-100 bg-white p-3">
+              <p className="text-lg font-black text-slate-900">6h – 21h</p>
+              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">service 7j/7, jours fériés inclus</p>
+            </div>
+          </div>
+
+          <div className="mb-5 flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-white">
+            <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-400" />
+            <p className="min-w-0 flex-1 text-[10px] font-bold">Petersen</p>
+            <span className="h-px flex-1 border-t border-dashed border-white/50" />
+            <span className="text-[9px] font-black uppercase text-emerald-300">Grand Médine</span>
+            <span className="h-px flex-1 border-t border-dashed border-white/50" />
+            <p className="min-w-0 flex-1 text-right text-[10px] font-bold">Guédiawaye</p>
+          </div>
+
+          <div className="grid gap-3">
+            {BRT_LINES.map((line) => (
+              <article key={line.id} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className={`${line.color} grid h-11 w-11 shrink-0 place-items-center rounded-xl text-xs font-black text-white`}>
+                    {line.number}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <h3 className="text-sm font-black text-slate-900">{line.name}</h3>
+                      <span className="text-[10px] font-bold text-slate-400">{line.stations}</span>
+                    </div>
+                    <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-600">{line.route}</p>
+                    <p className="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
+                      <Clock size={12} className="shrink-0 text-red-700" /> {line.schedule}
+                    </p>
+                    <p className="mt-1 text-[10px] font-semibold text-slate-500">{line.frequency}</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-4 rounded-2xl bg-emerald-50 p-4">
+            <p className="text-[10px] font-black uppercase tracking-wide text-emerald-800">Pôles et correspondances</p>
+            <p className="mt-1 text-xs leading-relaxed text-emerald-900">Petersen, Grand Médine et Guédiawaye sont les principaux pôles d’échanges. Correspondances possibles avec Dakar Dem Dikk et le TER, sur des réseaux distincts.</p>
+          </div>
+        </section>
       </main>
 
       {/* FOOTER RÉORGANISÉ */}
