@@ -74,7 +74,9 @@ export const LineDetail = ({ line, onBack }: Props) => {
       {/* ITINÉRAIRE */}
       <div className="px-6 pb-16">
         <h2 className="font-bold mb-6 text-gray-800">
-          {line.type === "BRT" ? "Terminus du trajet" : "Itinéraire détaillé"}
+          {line.type === "BRT" && !line.stopListComplete
+            ? "Arrêts indiqués"
+            : "Itinéraire détaillé"}
         </h2>
 
         <div className="relative pl-6">
