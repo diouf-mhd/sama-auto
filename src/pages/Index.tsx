@@ -287,35 +287,7 @@ const Index = () => {
             <button onClick={() => setSelectedType(selectedType === "TER" ? null : "TER")} className={`flex-1 py-4 rounded-2xl font-black text-[11px] uppercase transition-all flex items-center justify-center gap-2 ${selectedType === "TER" ? 'bg-red-700 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}><Zap size={14} /> TER ({stats.ter})</button>
         </div>
 
-        <div className="space-y-6">
-          <h3 className="font-black text-slate-900 text-sm flex items-center gap-2 tracking-tight px-1 uppercase italic"><Info size={14} className="text-blue-500" /> Itinéraires</h3>
-          <div className="grid gap-4">
-            {filteredLines.length > 0 ? (
-              filteredLines.map((line) => (
-                <FadeInScroll key={line.id}>
-                  <div onClick={() => setSelectedLine(line)} className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center justify-between group active:scale-[0.97] transition-all">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg ${line.type === 'DDD' ? 'bg-blue-600' : line.type === 'TER' ? 'bg-red-700' : 'bg-green-600'}`}>
-                        <span className="text-[16px] font-black leading-none">{line.number}</span>
-                        <span className="text-[7px] font-bold uppercase opacity-70 mt-1">{line.type}</span>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-black text-slate-900 text-[13px] truncate uppercase">{line.from_stop}</p>
-                        <ArrowRight size={10} className="my-0.5 text-slate-300" />
-                        <p className="font-black text-slate-900 text-[13px] truncate uppercase">{line.to_stop}</p>
-                      </div>
-                    </div>
-                    <ChevronRight size={18} className="text-slate-200" />
-                  </div>
-                </FadeInScroll>
-              ))
-            ) : (
-              <div className="text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 text-slate-300 italic text-sm">Aucun trajet trouvé...</div>
-            )}
-          </div>
-        </div>
-
-        <section id="brt" className="mt-10 border-t border-slate-100 pt-8">
+        <section id="brt" className="mb-10 border-t border-slate-100 pt-8">
           <div className="mb-5 flex items-start justify-between gap-3">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-red-700">SunuBRT · Dakar</p>
@@ -373,6 +345,35 @@ const Index = () => {
             <p className="mt-1 text-xs leading-relaxed text-emerald-900">Petersen, Grand Médine et Guédiawaye sont les principaux pôles d’échanges. Correspondances possibles avec Dakar Dem Dikk et le TER, sur des réseaux distincts.</p>
           </div>
         </section>
+
+        <div className="space-y-6">
+          <h3 className="font-black text-slate-900 text-sm flex items-center gap-2 tracking-tight px-1 uppercase italic"><Info size={14} className="text-blue-500" /> Itinéraires</h3>
+          <div className="grid gap-4">
+            {filteredLines.length > 0 ? (
+              filteredLines.map((line) => (
+                <FadeInScroll key={line.id}>
+                  <div onClick={() => setSelectedLine(line)} className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center justify-between group active:scale-[0.97] transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg ${line.type === 'DDD' ? 'bg-blue-600' : line.type === 'TER' ? 'bg-red-700' : 'bg-green-600'}`}>
+                        <span className="text-[16px] font-black leading-none">{line.number}</span>
+                        <span className="text-[7px] font-bold uppercase opacity-70 mt-1">{line.type}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-black text-slate-900 text-[13px] truncate uppercase">{line.from_stop}</p>
+                        <ArrowRight size={10} className="my-0.5 text-slate-300" />
+                        <p className="font-black text-slate-900 text-[13px] truncate uppercase">{line.to_stop}</p>
+                      </div>
+                    </div>
+                    <ChevronRight size={18} className="text-slate-200" />
+                  </div>
+                </FadeInScroll>
+              ))
+            ) : (
+              <div className="text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 text-slate-300 italic text-sm">Aucun trajet trouvé...</div>
+            )}
+          </div>
+        </div>
+
       </main>
 
       {/* FOOTER RÉORGANISÉ */}
