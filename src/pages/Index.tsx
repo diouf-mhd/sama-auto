@@ -156,9 +156,13 @@ const BRT_LINES = [
   {
     id: "brt-b1",
     number: "B1",
+    type: "BRT",
     name: "Omnibus",
+    from_stop: "Préfecture de Guédiawaye",
+    to_stop: "Papa Gueye Fall",
     route: "Préfecture de Guédiawaye ↔ Papa Gueye Fall",
-    stations: "21 stations",
+    stops: ["Préfecture de Guédiawaye", "Papa Gueye Fall"],
+    stationCount: 21,
     schedule: "Tous les jours, 6h–21h",
     frequency: "6 min lun–sam · 10 puis 7 min le dimanche",
     color: "bg-emerald-700",
@@ -166,9 +170,13 @@ const BRT_LINES = [
   {
     id: "brt-b2",
     number: "B2",
+    type: "BRT",
     name: "Semi-express",
+    from_stop: "Guédiawaye",
+    to_stop: "Petersen",
     route: "Guédiawaye ↔ Petersen",
-    stations: "Moins d’arrêts que la B1",
+    stops: ["Guédiawaye", "Petersen"],
+    stationInfo: "Moins d’arrêts que la B1",
     schedule: "Tous les jours, 6h–21h",
     frequency: "Fréquence standard : 6 min",
     color: "bg-orange-600",
@@ -176,9 +184,14 @@ const BRT_LINES = [
   {
     id: "brt-b3",
     number: "B3",
+    type: "BRT",
     name: "Semi-express · heures de pointe",
+    from_stop: "Petersen",
+    to_stop: "Préfecture de Guédiawaye",
     route: "Desserte du corridor BRT",
-    stations: "7 stations · 2 pôles d’échanges",
+    stops: ["Petersen", "Préfecture de Guédiawaye"],
+    stationCount: 7,
+    stationInfo: "2 pôles d’échanges",
     schedule: "Du lundi au vendredi, aux heures de pointe",
     frequency: "Ne dessert pas Grand Médine",
     color: "bg-emerald-700",
@@ -186,9 +199,13 @@ const BRT_LINES = [
   {
     id: "brt-b4",
     number: "B4",
+    type: "BRT",
     name: "Express",
+    from_stop: "Corridor BRT",
+    to_stop: "Grand Médine",
     route: "Terminus : pôle d’échange de Grand Médine",
-    stations: "Desserte express",
+    stops: ["Corridor BRT", "Grand Médine"],
+    stationInfo: "Desserte express",
     schedule: "Tous les jours, 6h–21h",
     frequency: "Fréquence standard : 6 min",
     color: "bg-orange-600",
@@ -196,9 +213,9 @@ const BRT_LINES = [
 ];
 
 const Index = () => {
-  const [lines, setLines] = useState<any[]>([]);
+  const [lines, setLines] = useState<any[]>([TER_LINE, ...BRT_LINES]);
   const [selectedLine, setSelectedLine] = useState<any | null>(null);
-  const [selectedType, setSelectedType] = useState<"DDD" | "TATA" | "TER" | null>(null);
+  const [selectedType, setSelectedType] = useState<"DDD" | "TATA" | "BRT" | "TER" | null>(null);
   const [startPoint, setStartPoint] = useState("");
   const [endPoint, setEndPoint] = useState("");
   const [showDonationModal, setShowDonationModal] = useState(false);
@@ -207,7 +224,7 @@ const Index = () => {
   useEffect(() => {
     const fetchLines = async () => {
       const { data } = await supabase.from("bus_lines").select("*");
-      setLines(data ? [...data, TER_LINE] : [TER_LINE]);
+      setLines([...(data || []), TER_LINE, ...BRT_LINES]);
     };
     fetchLines();
   }, []);
@@ -215,6 +232,7 @@ const Index = () => {
   const stats = useMemo(() => ({
     ddd: lines.filter(l => l.type === "DDD").length,
     tata: lines.filter(l => l.type === "TATA").length,
+    brt: lines.filter(l => l.type === "BRT").length,
     ter: lines.filter(l => l.type === "TER").length,
   }), [lines]);
 
@@ -284,67 +302,9 @@ const Index = () => {
         <div className="flex gap-2 mb-8">
             <button onClick={() => setSelectedType(selectedType === "DDD" ? null : "DDD")} className={`flex-1 py-4 rounded-2xl font-black text-[11px] uppercase transition-all flex items-center justify-center gap-2 ${selectedType === "DDD" ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}><Bus size={14} /> DDD ({stats.ddd})</button>
             <button onClick={() => setSelectedType(selectedType === "TATA" ? null : "TATA")} className={`flex-1 py-4 rounded-2xl font-black text-[11px] uppercase transition-all flex items-center justify-center gap-2 ${selectedType === "TATA" ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}><Zap size={14} /> TATA ({stats.tata})</button>
+            <button onClick={() => setSelectedType(selectedType === "BRT" ? null : "BRT")} className={`flex-1 py-4 rounded-2xl font-black text-[10px] uppercase transition-all flex items-center justify-center gap-1 ${selectedType === "BRT" ? 'bg-orange-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}><Bus size={13} /> BRT ({stats.brt})</button>
             <button onClick={() => setSelectedType(selectedType === "TER" ? null : "TER")} className={`flex-1 py-4 rounded-2xl font-black text-[11px] uppercase transition-all flex items-center justify-center gap-2 ${selectedType === "TER" ? 'bg-red-700 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}><Zap size={14} /> TER ({stats.ter})</button>
         </div>
-
-        <section id="brt" className="mb-10 border-t border-slate-100 pt-8">
-          <div className="mb-5 flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-red-700">SunuBRT · Dakar</p>
-              <h2 className="mt-1 text-xl font-black uppercase italic text-slate-900">Le réseau BRT</h2>
-              <p className="mt-1 text-xs font-medium text-slate-500">Petersen / Papa Gueye Fall ↔ Préfecture de Guédiawaye</p>
-            </div>
-            <span className="shrink-0 rounded-xl bg-red-700 px-3 py-2 text-xs font-black text-white">18,3 km</span>
-          </div>
-
-          <div className="mb-5 grid grid-cols-2 gap-2">
-            <div className="rounded-2xl border border-slate-100 bg-white p-3">
-              <p className="text-lg font-black text-slate-900">Jusqu’à 23</p>
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">stations sur le corridor</p>
-            </div>
-            <div className="rounded-2xl border border-slate-100 bg-white p-3">
-              <p className="text-lg font-black text-slate-900">6h – 21h</p>
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">service 7j/7, jours fériés inclus</p>
-            </div>
-          </div>
-
-          <div className="mb-5 flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-white">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-400" />
-            <p className="min-w-0 flex-1 text-[10px] font-bold">Petersen</p>
-            <span className="h-px flex-1 border-t border-dashed border-white/50" />
-            <span className="text-[9px] font-black uppercase text-emerald-300">Grand Médine</span>
-            <span className="h-px flex-1 border-t border-dashed border-white/50" />
-            <p className="min-w-0 flex-1 text-right text-[10px] font-bold">Guédiawaye</p>
-          </div>
-
-          <div className="grid gap-3">
-            {BRT_LINES.map((line) => (
-              <article key={line.id} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <div className={`${line.color} grid h-11 w-11 shrink-0 place-items-center rounded-xl text-xs font-black text-white`}>
-                    {line.number}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <h3 className="text-sm font-black text-slate-900">{line.name}</h3>
-                      <span className="text-[10px] font-bold text-slate-400">{line.stations}</span>
-                    </div>
-                    <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-600">{line.route}</p>
-                    <p className="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
-                      <Clock size={12} className="shrink-0 text-red-700" /> {line.schedule}
-                    </p>
-                    <p className="mt-1 text-[10px] font-semibold text-slate-500">{line.frequency}</p>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <div className="mt-4 rounded-2xl bg-emerald-50 p-4">
-            <p className="text-[10px] font-black uppercase tracking-wide text-emerald-800">Pôles et correspondances</p>
-            <p className="mt-1 text-xs leading-relaxed text-emerald-900">Petersen, Grand Médine et Guédiawaye sont les principaux pôles d’échanges. Correspondances possibles avec Dakar Dem Dikk et le TER, sur des réseaux distincts.</p>
-          </div>
-        </section>
 
         <div className="space-y-6">
           <h3 className="font-black text-slate-900 text-sm flex items-center gap-2 tracking-tight px-1 uppercase italic"><Info size={14} className="text-blue-500" /> Itinéraires</h3>
@@ -354,7 +314,7 @@ const Index = () => {
                 <FadeInScroll key={line.id}>
                   <div onClick={() => setSelectedLine(line)} className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center justify-between group active:scale-[0.97] transition-all">
                     <div className="flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg ${line.type === 'DDD' ? 'bg-blue-600' : line.type === 'TER' ? 'bg-red-700' : 'bg-green-600'}`}>
+                      <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg ${line.type === 'DDD' ? 'bg-blue-600' : line.type === 'TER' ? 'bg-red-700' : line.type === 'BRT' ? line.color : 'bg-green-600'}`}>
                         <span className="text-[16px] font-black leading-none">{line.number}</span>
                         <span className="text-[7px] font-bold uppercase opacity-70 mt-1">{line.type}</span>
                       </div>
@@ -362,6 +322,16 @@ const Index = () => {
                         <p className="font-black text-slate-900 text-[13px] truncate uppercase">{line.from_stop}</p>
                         <ArrowRight size={10} className="my-0.5 text-slate-300" />
                         <p className="font-black text-slate-900 text-[13px] truncate uppercase">{line.to_stop}</p>
+                        {line.type === "BRT" && (
+                          <>
+                            <p className="mt-2 text-[10px] font-bold text-slate-500">
+                              {line.name} · {line.stationCount ? `${line.stationCount} stations` : line.stationInfo}
+                            </p>
+                            <p className="mt-1 flex items-center gap-1 text-[9px] font-semibold text-slate-400">
+                              <Clock size={11} /> {line.schedule} · {line.frequency}
+                            </p>
+                          </>
+                        )}
                       </div>
                     </div>
                     <ChevronRight size={18} className="text-slate-200" />

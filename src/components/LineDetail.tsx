@@ -38,7 +38,11 @@ export const LineDetail = ({ line, onBack }: Props) => {
           </div>
 
           <div className="bg-gray-100 px-3 py-1 rounded-full text-xs">
-            {line.stops?.length || 0} arrêts
+            {line.type === "BRT"
+              ? line.stationCount
+                ? `${line.stationCount} stations`
+                : "Arrêts non précisés"
+              : `${line.stops?.length || 0} arrêts`}
           </div>
         </div>
 
@@ -55,13 +59,22 @@ export const LineDetail = ({ line, onBack }: Props) => {
             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
             <p className="font-semibold">{line.to_stop}</p>
           </div>
+
+          {line.type === "BRT" && (
+            <div className="mt-4 rounded-xl bg-orange-50 p-3 text-sm">
+              <p className="font-semibold text-gray-800">{line.name}</p>
+              {line.stationInfo && <p className="mt-1 text-gray-600">{line.stationInfo}</p>}
+              <p className="mt-2 text-gray-600">{line.schedule}</p>
+              <p className="mt-1 text-gray-600">{line.frequency}</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ✅ ITINÉRAIRE DÉTAILLÉ */}
+      {/* ITINÉRAIRE */}
       <div className="px-6 pb-16">
         <h2 className="font-bold mb-6 text-gray-800">
-          Itinéraire détaillé
+          {line.type === "BRT" ? "Terminus du trajet" : "Itinéraire détaillé"}
         </h2>
 
         <div className="relative pl-6">
